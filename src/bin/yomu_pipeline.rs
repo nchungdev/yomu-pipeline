@@ -6,7 +6,9 @@ use serde::{Deserialize, Serialize};
 use std::fs::File;
 use std::io::{BufRead, BufReader, Write};
 use std::path::PathBuf;
-use yomu_pipeline::{process_page, FontRenderer, PipelineOptions, RegionInput};
+use yomu_pipeline::{
+    process_page, BubbleStyleHint, FontRenderer, NormalizedRect, PipelineOptions, RegionInput,
+};
 
 #[derive(Parser)]
 #[command(
@@ -82,11 +84,55 @@ fn load_font(font_path: Option<&PathBuf>) -> Result<FontRenderer, Box<dyn std::e
     }
 }
 
+fn parse_regions_flexible<R: std::io::Read>(
+    reader: R,
+) -> Result<Vec<RegionInput>, Box<dyn std::error::Error>> {
+    let value: serde_json::Value = serde_json::from_reader(reader)?;
+    if let Ok(regions) = serde_json::from_value::<Vec<RegionInput>>(value.clone()) {
+        return Ok(regions);
+    }
+    if let Some(arr) = value.get("regions").and_then(|r| r.as_array()) {
+        let mut out = Vec::new();
+        for item in arr {
+            let recognized = item.get("recognized");
+            let id = recognized
+                .and_then(|r| r.get("id"))
+                .and_then(|i| i.as_str())
+                .unwrap_or("region")
+                .to_string();
+            let bounds_val = recognized.and_then(|r| r.get("bounds"));
+            let bounds: NormalizedRect = if let Some(b) = bounds_val {
+                serde_json::from_value(b.clone())?
+            } else {
+                continue;
+            };
+            let text = item
+                .get("translated_text")
+                .and_then(|t| t.as_str())
+                .or_else(|| {
+                    recognized
+                        .and_then(|r| r.get("text"))
+                        .and_then(|t| t.as_str())
+                })
+                .unwrap_or("")
+                .to_string();
+            out.push(RegionInput {
+                id,
+                bounds,
+                text,
+                style_hint: BubbleStyleHint::Balloon,
+            });
+        }
+        return Ok(out);
+    }
+    Err("Failed to parse regions as either Vec<RegionInput> or Sidecar JSON with 'regions'".into())
+}
+
 fn run_single_inpaint(args: InpaintArgs) -> Result<(), Box<dyn std::error::Error>> {
     let renderer = load_font(args.font.as_ref())?;
     let img = ImageReader::open(&args.image)?.decode()?.into_rgba8();
     let file = File::open(&args.regions)?;
-    let regions: Vec<RegionInput> = serde_json::from_reader(file)?;
+    let regions = parse_regions_flexible(file)?;
 
     let result = process_page(&img, &regions, &renderer, PipelineOptions::default());
     result.image.save(&args.output)?;
