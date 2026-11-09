@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# project-pro pre-commit gate: Staged Secret Scan + Clean Arch Boundary + Anti-God-File (<= 450 LOC)
+set -euo pipefail
+ROOT_DIR="$(git rev-parse --show-toplevel)"
+if command -v gitleaks >/dev/null 2>&1; then
+  echo "[pre-commit] Running gitleaks staged secret scan..."
+  gitleaks protect --staged --redact --no-banner
+fi
+if [ -f "$HOME/.agent-skills/plugins/project-pro/skills/project-pro/scripts/project_pro.py" ]; then
+  echo "[pre-commit] Running project-pro staged architecture & security audit..."
+  python3 "$HOME/.agent-skills/plugins/project-pro/skills/project-pro/scripts/project_pro.py" audit --target "$ROOT_DIR" --staged --fail-on-error
+fi

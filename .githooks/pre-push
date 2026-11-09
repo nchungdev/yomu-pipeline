@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+# project-pro pre-push gate: Full Audit + CVE Check + Lint + Unit Tests
+set -euo pipefail
+ROOT_DIR="$(git rev-parse --show-toplevel)"
+cd "$ROOT_DIR"
+if [ -f "$HOME/.agent-skills/plugins/project-pro/skills/project-pro/scripts/project_pro.py" ]; then
+  echo "[pre-push] 1/4 Running full repository architecture, file-size & security audit..."
+  python3 "$HOME/.agent-skills/plugins/project-pro/skills/project-pro/scripts/project_pro.py" audit --target "$ROOT_DIR" --fail-on-error
+fi
+if command -v gitleaks >/dev/null 2>&1; then
+  echo "[pre-push] Running gitleaks repository scan..."
+  gitleaks detect --source "$ROOT_DIR" --redact --no-banner
+fi
+echo "[pre-push] 2/4 Checking dependency vulnerabilities..."
+if command -v "cargo-audit" >/dev/null 2>&1; then
+  cargo audit || { echo "[pre-push] Dependency vulnerability check failed." >&2; exit 1; }
+else
+  echo '[pre-push] (Skipped: cargo audit — cargo-audit not installed)'
+fi
+echo "[pre-push] 3/4 Running lint & static typecheck..."
+if command -v "cargo" >/dev/null 2>&1; then
+  cargo fmt --all -- --check && cargo clippy --all-targets -- -D warnings
+else
+  echo '[pre-push] (Skipped: cargo fmt --all -- --check && cargo clippy --all-targets -- -D warnings — cargo not installed)'
+fi
+echo "[pre-push] 4/4 Running unit test suite..."
+if command -v "cargo" >/dev/null 2>&1; then
+  cargo test
+else
+  echo '[pre-push] (Skipped: cargo test — cargo not installed)'
+fi
+echo "[pre-push] All security, architecture, lint, and test gates PASSED."

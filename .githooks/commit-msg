@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -euo pipefail
+if [ -f "$HOME/.agent-skills/plugins/project-pro/skills/project-pro/scripts/project_pro.py" ]; then
+  python3 "$HOME/.agent-skills/plugins/project-pro/skills/project-pro/scripts/project_pro.py" check-commit-msg --file "$1"
+fi

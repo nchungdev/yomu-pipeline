@@ -1,0 +1,38 @@
+{
+  "schemaVersion": "1.2.0",
+  "generator": "project-pro",
+  "updatedAt": "2026-11-09T15:06:48Z",
+  "projectName": "Yomu Pipeline",
+  "stack": "rust",
+  "stackLabel": "Rust (single crate / headless library + CLI worker)",
+  "architecture": "lightweight",
+  "pattern": "headless-pipeline",
+  "referenceRepo": "LukeMathWalker/zero-to-production",
+  "referenceRepoUrl": "https://github.com/LukeMathWalker/zero-to-production",
+  "fileLineLimits": {
+    "warn": 300,
+    "fail": 450
+  },
+  "selectedFeatures": [
+    "solid-dry",
+    "typed-errors",
+    "arch-lint",
+    "testing-ci",
+    "di-core"
+  ],
+  "selectedAgentTargets": [
+    "adr-docs",
+    "agent-runtime-hooks",
+    "agents-root",
+    "claude-gemini",
+    "git-security-hooks",
+    "persistent-memory"
+  ],
+  "commands": {
+    "build": "cargo build",
+    "test_all": "cargo test",
+    "test_single": "cargo test --test <file> -- <test_name>",
+    "lint": "cargo fmt --all -- --check && cargo clippy --all-targets -- -D warnings",
+    "sec_audit": "cargo audit"
+  }
+}

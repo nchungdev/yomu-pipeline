@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$HOME/.agent-skills/plugins/project-pro/skills/project-pro/scripts/project_pro.py\" agent-guard",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}
