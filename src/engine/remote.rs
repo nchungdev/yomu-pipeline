@@ -145,9 +145,12 @@ impl TranslationEngine for RemoteEngine {
         let client = self.client.clone();
         let token = self.auth_token.clone();
 
-        // Synchronous / blocking block or spawn on tokio
-        tokio::task::block_in_place(|| {
-            tokio::runtime::Handle::current().block_on(async {
+        let handle = std::thread::spawn(move || {
+            let rt = tokio::runtime::Builder::new_current_thread()
+                .enable_all()
+                .build()
+                .map_err(|e| EngineError::Internal(e.to_string()))?;
+            rt.block_on(async {
                 let mut req = client.post(&url).json(&req_body);
                 if let Some(t) = &token {
                     req = req.bearer_auth(t);
@@ -164,7 +167,10 @@ impl TranslationEngine for RemoteEngine {
                     .await
                     .map_err(|e| EngineError::Internal(e.to_string()))
             })
-        })
+        });
+        handle
+            .join()
+            .map_err(|_| EngineError::Internal("Relayout worker thread panicked".into()))?
     }
 
     fn cache_key(&self, source_hash: &str, options: &TranslateOptions) -> String {
