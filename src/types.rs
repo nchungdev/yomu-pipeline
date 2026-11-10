@@ -4,6 +4,7 @@ use image::RgbaImage;
 use serde::{Deserialize, Serialize};
 
 use crate::contour::BubbleContour;
+use crate::contract::v1::RegionKind;
 
 /// Errors associated with rectangular bounds and coordinates.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, thiserror::Error)]
@@ -119,9 +120,30 @@ pub enum BubbleStyleHint {
 pub struct RegionInput {
     pub id: String,
     pub bounds: NormalizedRect,
+    /// Translated text to typeset in the region.
     pub text: String,
     #[serde(default)]
     pub style_hint: BubbleStyleHint,
+    /// Semantic category; `Sfx` regions are never erased or redrawn.
+    #[serde(default)]
+    pub kind: RegionKind,
+    /// Typography supplied by the caller; inferred from the image when absent.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub typography: Option<InferredTypography>,
+}
+
+impl RegionInput {
+    /// Balloon region with default hint and no typography override.
+    pub fn new(id: impl Into<String>, bounds: NormalizedRect, text: impl Into<String>) -> Self {
+        Self {
+            id: id.into(),
+            bounds,
+            text: text.into(),
+            style_hint: BubbleStyleHint::default(),
+            kind: RegionKind::default(),
+            typography: None,
+        }
+    }
 }
 
 /// Inpainting results including the cleaned image and detected bubble contours.

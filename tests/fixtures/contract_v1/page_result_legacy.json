@@ -1,0 +1,169 @@
+{
+  "schema_version": 1,
+  "page_id": "p1",
+  "source_hash": "abc123",
+  "cache_key": "key-1",
+  "page_px": {
+    "width": 800,
+    "height": 1200
+  },
+  "regions": [
+    {
+      "region_id": "r1",
+      "kind": "balloon",
+      "reading_order": 0,
+      "source_text": "こんにちは",
+      "translated_text": "Xin chào",
+      "confidence": 0.75,
+      "bounds": {
+        "x": 0.25,
+        "y": 0.5,
+        "width": 0.25,
+        "height": 0.125
+      },
+      "polygon": [
+        [
+          0.25,
+          0.5
+        ],
+        [
+          0.5,
+          0.5
+        ],
+        [
+          0.5,
+          0.625
+        ],
+        [
+          0.25,
+          0.625
+        ]
+      ],
+      "typography": {
+        "text_color": [
+          0,
+          0,
+          0,
+          255
+        ],
+        "stroke_width": 0.0,
+        "rotation_rad": 0.0,
+        "is_vertical": false
+      },
+      "layout": {
+        "font_px": 18.0,
+        "lines": [
+          {
+            "text": "Xin chào",
+            "origin_px": {
+              "x": 210.5,
+              "y": 640.0
+            },
+            "width_px": 80.0
+          }
+        ]
+      },
+      "erase": {
+        "type": "patch",
+        "rect_norm": {
+          "x": 0.25,
+          "y": 0.5,
+          "width": 0.25,
+          "height": 0.125
+        },
+        "rect_px": {
+          "x": 200.0,
+          "y": 600.0,
+          "w": 1.0,
+          "h": 1.0
+        },
+        "format": "raw_rgba",
+        "data": [
+          255,
+          255,
+          255,
+          255
+        ]
+      },
+      "status": {
+        "state": "rendered"
+      }
+    },
+    {
+      "region_id": "r2",
+      "kind": "sfx",
+      "reading_order": 1,
+      "source_text": "ドン",
+      "translated_text": "",
+      "confidence": 0.5,
+      "bounds": {
+        "x": 0.5,
+        "y": 0.5,
+        "width": 0.125,
+        "height": 0.125
+      },
+      "polygon": [],
+      "typography": {
+        "text_color": [
+          0,
+          0,
+          0,
+          255
+        ],
+        "stroke_width": 0.0,
+        "rotation_rad": 0.0,
+        "is_vertical": false
+      },
+      "layout": null,
+      "erase": {
+        "type": "none"
+      },
+      "status": {
+        "state": "skipped",
+        "reason": "sfx_policy"
+      }
+    },
+    {
+      "region_id": "r3",
+      "kind": "narration",
+      "reading_order": 2,
+      "source_text": "長い",
+      "translated_text": "Rất dài",
+      "confidence": 0.25,
+      "bounds": {
+        "x": 0.0,
+        "y": 0.0,
+        "width": 0.125,
+        "height": 0.125
+      },
+      "polygon": [],
+      "typography": {
+        "text_color": [
+          10,
+          20,
+          30,
+          255
+        ],
+        "stroke_color": [
+          255,
+          255,
+          255,
+          255
+        ],
+        "stroke_width": 1.0,
+        "rotation_rad": 0.0,
+        "is_vertical": true,
+        "estimated_font_size": 14.0
+      },
+      "layout": null,
+      "erase": {
+        "type": "none"
+      },
+      "status": {
+        "state": "failed",
+        "reason": "layout_does_not_fit"
+      }
+    }
+  ],
+  "composited": null
+}

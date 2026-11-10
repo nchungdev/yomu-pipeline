@@ -154,6 +154,34 @@ impl BubbleContour {
         (bw >= min_sz && bh >= min_sz).then_some((bx, by, bw, bh))
     }
 
+    /// Rectangle contour covering the whole of `b`; used when no bubble outline is detected.
+    /// `None` when the rectangle is smaller than one pixel on either axis.
+    pub fn from_bounds(image: &RgbaImage, b: NormalizedRect) -> Option<Self> {
+        let (w, h) = (image.width(), image.height());
+        let (bx, by, bw, bh) = Self::pixel_rect_coords(w, h, b, 0.0, 2)?;
+        let seed_color = [
+            (bx, by),
+            (bx + bw - 1, by),
+            (bx, by + bh - 1),
+            (bx + bw - 1, by + bh - 1),
+        ]
+        .iter()
+        .map(|&(x, y)| *image.get_pixel(x, y))
+        .max_by(|a, c| pixel_luminance(a).total_cmp(&pixel_luminance(c)))?;
+        Some(Self {
+            img_w: w,
+            img_h: h,
+            box_x: bx,
+            box_y: by,
+            box_w: bw,
+            box_h: bh,
+            min_y: 0,
+            max_y: bh - 1,
+            row_spans: vec![Some((0, bw - 1)); bh as usize],
+            seed_color,
+        })
+    }
+
     pub fn detect_in_pixel_rect(
         image: &RgbaImage,
         box_x: u32,
@@ -162,6 +190,11 @@ impl BubbleContour {
         box_h: u32,
         opts: ContourDetectionOptions,
     ) -> Option<Self> {
+        let fits = box_x.checked_add(box_w)? <= image.width()
+            && box_y.checked_add(box_h)? <= image.height();
+        if box_w == 0 || box_h == 0 || !fits {
+            return None;
+        }
         let (w, h) = (box_w as usize, box_h as usize);
         let bright = |x: usize, y: usize| {
             pixel_luminance(image.get_pixel(box_x + x as u32, box_y + y as u32))

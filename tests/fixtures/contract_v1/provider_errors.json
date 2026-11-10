@@ -1,0 +1,39 @@
+[
+  {
+    "rate_limited": {
+      "retry_after_ms": 1000
+    }
+  },
+  {
+    "rate_limited": {}
+  },
+  {
+    "quota_exhausted": {
+      "reset_hint_ms": 3600000
+    }
+  },
+  {
+    "quota_exhausted": {}
+  },
+  {
+    "auth": {
+      "status": 401
+    }
+  },
+  {
+    "content_blocked": {
+      "reason": "safety"
+    }
+  },
+  {
+    "bad_request": "too large"
+  },
+  {
+    "server": 503
+  },
+  "network",
+  "timeout",
+  {
+    "invalid_response": "not json"
+  }
+]

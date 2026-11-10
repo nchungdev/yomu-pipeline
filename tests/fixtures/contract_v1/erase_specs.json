@@ -1,0 +1,47 @@
+[
+  {
+    "type": "patch",
+    "rect_norm": {
+      "x": 0.0,
+      "y": 0.0,
+      "width": 0.5,
+      "height": 0.5
+    },
+    "rect_px": {
+      "x": 1.0,
+      "y": 2.0,
+      "w": 3.0,
+      "h": 4.0
+    },
+    "format": "png",
+    "data": [
+      137,
+      80
+    ]
+  },
+  {
+    "type": "patch",
+    "rect_norm": {
+      "x": 0.0,
+      "y": 0.0,
+      "width": 0.5,
+      "height": 0.5
+    },
+    "rect_px": {
+      "x": 1.0,
+      "y": 2.0,
+      "w": 1.0,
+      "h": 1.0
+    },
+    "format": "raw_rgba",
+    "data": [
+      1,
+      2,
+      3,
+      255
+    ]
+  },
+  {
+    "type": "none"
+  }
+]
