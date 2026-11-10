@@ -12,12 +12,16 @@ pub mod mask;
 pub mod pipeline;
 pub mod pipeline_result;
 pub mod render;
+#[cfg(feature = "llm")]
+pub mod server;
 pub mod sidecar;
 pub mod types;
 pub mod typography;
 
 pub use contour::{BubbleContour, ContourDetectionOptions};
 pub use contract::v1::{CancelToken, EngineError, EventSink, JobHandle, TranslationEngine};
+#[cfg(feature = "llm")]
+pub use engine::RemoteEngine;
 pub use engine::{
     cache_key, event_channel, glossary_hash, CallbackEventSink, ChannelEventSink, EmbeddedEngine,
 };
@@ -33,6 +37,8 @@ pub use mask::{anchor_spans, fill_enclosed_holes, longest_run};
 pub use pipeline::{process_page, PipelineOptions, ProcessedPage, RegionReport};
 pub use pipeline_result::{process_page_result, PageOutcome};
 pub use render::{FontError, FontRenderer, DEFAULT_FONT_BYTES};
+#[cfg(feature = "llm")]
+pub use server::{ApiStatus, RelayoutApiRequest, ServerConfig, ServerHandler};
 pub use sidecar::{parse_page, ParsedPage, SidecarError};
 pub use types::{
     BubbleStyleHint, InferredTypography, InpaintedPage, NormalizedRect, PxRect, RectError,
