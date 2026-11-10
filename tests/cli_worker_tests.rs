@@ -34,6 +34,8 @@ fn test_cli_inpaint_subcommand() {
         bounds: NormalizedRect::new(0.08, 0.08, 0.84, 0.84).unwrap(),
         text: "Chào bạn!".to_string(),
         style_hint: BubbleStyleHint::Balloon,
+        kind: Default::default(),
+        typography: None,
     }];
     std::fs::write(&regions_path, serde_json::to_string(&regions).unwrap()).unwrap();
 
@@ -68,6 +70,8 @@ fn test_cli_worker_subcommand() {
         bounds: NormalizedRect::new(0.08, 0.08, 0.84, 0.84).unwrap(),
         text: "Worker OK".to_string(),
         style_hint: BubbleStyleHint::Balloon,
+        kind: Default::default(),
+        typography: None,
     }];
 
     let job_json = serde_json::json!({

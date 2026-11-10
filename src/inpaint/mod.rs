@@ -1,12 +1,16 @@
 //! Inpainting algorithms: flat fill and smart inpaint with contour preservation.
 
+pub mod extent;
 pub mod flat_fill;
+pub mod region;
 pub use flat_fill::*;
+pub use region::{erase_region, region_contour, ContourSource};
 
 use image::{Rgba, RgbaImage};
 
-use crate::contour::{BubbleContour, ContourDetectionOptions, DEFAULT_INSET};
-use crate::types::{BubbleStyleHint, InpaintedPage, NormalizedRect, RegionInput};
+use crate::contour::BubbleContour;
+use crate::contract::v1::RegionKind;
+use crate::types::{InpaintedPage, NormalizedRect, RegionInput};
 
 pub fn clamp_rect_against_neighbors(
     bounds: NormalizedRect,
@@ -71,46 +75,25 @@ pub fn smart_inpaint(
     contour.smart_inpaint(image, inset, fill)
 }
 
-fn is_non_standard_region(r: &RegionInput) -> bool {
-    if r.style_hint == BubbleStyleHint::FloatingText {
-        return true;
-    }
-    let id = r.id.trim().to_ascii_lowercase();
-    let text = r.text.trim();
-    ["float", "sfx"].iter().any(|k| id.contains(k))
-        || ["*", "~", "[float]"].iter().any(|p| text.starts_with(p))
-}
-
-fn is_dark_region(r: &RegionInput) -> bool {
-    if r.style_hint == BubbleStyleHint::DarkBalloon {
-        return true;
-    }
-    let id = r.id.trim().to_ascii_lowercase();
-    id.starts_with('d') || ["dark", "black"].iter().any(|k| id.contains(k))
-}
-
+/// Erases the source text of every eligible region and returns the contours used.
+///
+/// Regions of kind `Sfx` or with blank text are left untouched. This function does **not** check
+/// that the translated text fits; use [`crate::process_page`], which lays out before erasing, when
+/// the text must be drawn afterwards. A region whose background cannot be erased cleanly has a
+/// `None` contour and is left untouched.
 pub fn inpaint_page(img: &RgbaImage, regions: &[RegionInput]) -> InpaintedPage {
     let mut clean = img.clone();
-    let opts = ContourDetectionOptions::default();
-    let flat_fill = StatisticalFlatFill::default();
-
-    let contours: Vec<Option<BubbleContour>> = regions
+    let contours = regions
         .iter()
         .enumerate()
         .map(|(idx, r)| {
-            let bounded_box = clamp_rect_against_neighbors(r.bounds, idx, regions);
-            let fill_res = flat_fill.inpaint_rgba_image(&mut clean, bounded_box);
-            let non_standard = is_non_standard_region(r);
-
-            if fill_res == InpaintResult::FlatFilled {
-                (!non_standard).then(|| BubbleContour::detect_best(img, bounded_box, opts))?
-            } else {
-                let is_bright = !is_dark_region(r) && !non_standard;
-                let contour =
-                    is_bright.then(|| BubbleContour::detect_best(img, bounded_box, opts))??;
-                contour.smart_inpaint(&mut clean, DEFAULT_INSET, None);
-                Some(contour)
+            if r.kind == RegionKind::Sfx || r.text.trim().is_empty() {
+                return None;
             }
+            let bounds = clamp_rect_against_neighbors(r.bounds, idx, regions);
+            let (contour, source) = region_contour(img, r, bounds)?;
+            erase_region(&mut clean, bounds, &contour, source).ok()?;
+            Some(contour)
         })
         .collect();
 

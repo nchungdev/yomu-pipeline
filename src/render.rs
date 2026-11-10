@@ -5,6 +5,7 @@ use image::{Rgba, RgbaImage};
 use std::path::Path;
 
 use crate::contour::BubbleContour;
+use crate::contract::v1::{LayoutLine, PxPoint, TextLayoutV1};
 use crate::layout::{layout_region, FontRange, TextLayout};
 use crate::types::InferredTypography;
 
@@ -83,6 +84,31 @@ impl FontRenderer {
         Some(layout)
     }
 
+    /// Converts a layout to the contract form: `origin_px` is the pen origin on the alphabetic
+    /// baseline in source-image pixels, exactly where `render_layout` starts each line.
+    pub fn to_layout_v1(&self, layout: &TextLayout) -> TextLayoutV1 {
+        let ascent = self.font.as_scaled(PxScale::from(layout.font_px)).ascent();
+        let lines = layout
+            .lines
+            .iter()
+            .map(|line| {
+                let width_px = self.measure_width(&line.text, layout.font_px);
+                LayoutLine {
+                    text: line.text.clone(),
+                    origin_px: PxPoint {
+                        x: line.slice_center_x - width_px * 0.5,
+                        y: line.slice_y + ascent,
+                    },
+                    width_px,
+                }
+            })
+            .collect();
+        TextLayoutV1 {
+            font_px: layout.font_px,
+            lines,
+        }
+    }
+
     /// Renders lines of a computed `TextLayout` onto an RGBA canvas.
     pub fn render_layout(
         &self,
@@ -100,7 +126,12 @@ impl FontRenderer {
             let baseline_y = line.slice_y + v_metrics;
 
             if let Some(stroke_c) = typo.stroke_color {
-                let sw = typo.stroke_width.round().max(1.0) as i32;
+                let max_sw = (layout.font_px * 0.15).max(1.0);
+                let sw = if typo.stroke_width.is_finite() {
+                    typo.stroke_width.round().clamp(1.0, max_sw) as i32
+                } else {
+                    1
+                };
                 for dy in -sw..=sw {
                     for dx in -sw..=sw {
                         if dx * dx + dy * dy <= sw * sw && (dx != 0 || dy != 0) {

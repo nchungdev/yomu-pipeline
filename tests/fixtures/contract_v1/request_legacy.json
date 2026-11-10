@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "request_id": "old",
+  "pages": [
+    {
+      "page_id": "p1",
+      "image": {
+        "path": "/tmp/p1.jpg"
+      },
+      "known_source_hash": null,
+      "prior": null
+    }
+  ],
+  "options": {
+    "provider": "gemini",
+    "source_lang": "ja",
+    "target_lang": "vi",
+    "glossary": [
+      {
+        "source": "先生",
+        "target": "thầy"
+      }
+    ],
+    "reading_direction": "rtl",
+    "render_mode": "overlay",
+    "font_id": null,
+    "limits": {
+      "max_pages": 8,
+      "max_image_bytes": 1048576,
+      "timeout_ms": 60000
+    }
+  }
+}

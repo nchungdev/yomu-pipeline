@@ -31,6 +31,8 @@ fn create_test_page() -> (RgbaImage, Vec<RegionInput>) {
         bounds: NormalizedRect::new(0.1, 0.1, 0.8, 0.8).unwrap(),
         text: "Xin chào thế giới manga!".to_string(),
         style_hint: BubbleStyleHint::Balloon,
+        kind: Default::default(),
+        typography: None,
     }];
 
     (img, regions)

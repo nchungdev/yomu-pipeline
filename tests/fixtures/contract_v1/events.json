@@ -1,0 +1,12 @@
+[
+  { "event": "batch_started", "request_id": "req-1", "total_pages": 2 },
+  { "event": "page_stage", "page_id": "p1", "stage": "recognize" },
+  { "event": "throttled", "retry_after_ms": 1500 },
+  {
+    "event": "page_failed",
+    "page_id": "p2",
+    "failure": { "provider": { "rate_limited": { "retry_after_ms": 2000 } } }
+  },
+  { "event": "page_failed", "page_id": "p3", "failure": "cancelled" },
+  { "event": "batch_finished", "request_id": "req-1", "ok_pages": 1, "failed_pages": 1 }
+]

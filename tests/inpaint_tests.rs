@@ -66,6 +66,8 @@ fn test_inpaint_page_and_layout() {
         bounds: norm,
         text: "Xin chào bạn nhỏ".to_string(),
         style_hint: BubbleStyleHint::Balloon,
+        kind: Default::default(),
+        typography: None,
     }];
 
     let result = inpaint_page(&img, &regions);

@@ -235,6 +235,11 @@ pub fn is_character_length_balanced(original: &str, translated: &str) -> bool {
     (0.65..=1.50).contains(&(trans_len as f32 / orig_len as f32))
 }
 
+/// Upper bound on font-size search iterations, whatever `FontRange` says.
+const MAX_LAYOUT_ITERATIONS: usize = 512;
+/// Smallest allowed font-size search step in pixels.
+const MIN_STEP_PX: f32 = 0.25;
+
 pub fn layout_region(
     c: &BubbleContour,
     text: &str,
@@ -247,14 +252,16 @@ pub fn layout_region(
     }
     let min_slice_w = (c.box_w as f32 * 0.28).clamp(18.0, 42.0);
     let h_pad = (c.box_w as f32 * 0.05).clamp(2.5, 10.0);
-    let step = if font.step_px > 0.0 {
-        font.step_px
-    } else {
-        0.5
-    };
+    if !font.min_px.is_finite() || !font.max_px.is_finite() || !font.step_px.is_finite() {
+        return None;
+    }
+    let step = font.step_px.max(MIN_STEP_PX);
     let mut px = font.max_px;
 
-    while px >= font.min_px {
+    for _ in 0..MAX_LAYOUT_ITERATIONS {
+        if px < font.min_px || px <= 0.0 {
+            break;
+        }
         let slices = c.compute_line_slices(px * 1.18, min_slice_w, h_pad);
         let m = |s: &str| measure(s, px);
         if let Some(fitted) = c.fit_text_lines_centered(trimmed, &slices, m) {
