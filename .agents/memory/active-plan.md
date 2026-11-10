@@ -47,4 +47,11 @@
 - [x] `src/llm/mod.rs` & `src/lib.rs`: re-exports `translate_page`, `LlmPageRequest`, `LlmPage`, `LlmRegion` behind `#[cfg(feature = "llm")]`
 - [x] `tests/llm_chain_tests.rs` (8 unit/integration tests with MockTransport)
 - [x] `tests/llm_translate_page_tests.rs` (3 end-to-end tests: 1-tile, tall webtoon seam deduplication & coordinate remapping, atomic failure policy)
-- [ ] Next: Step 3 (TranslationEngine async + events + cancel + relayout_region + cache_key)
+- [x] Step 3 (TranslationEngine async + events + cancel + relayout_region + cache_key) — done
+  - `src/engine/cache_key.rs`: deterministic `cache_key` and order-independent `glossary_hash` (ADR-0002 §7.2, §8).
+  - `src/engine/sink.rs`: `CallbackEventSink`, `ChannelEventSink`, and `event_channel()`.
+  - `src/engine/runner.rs`: multi-stage batch processor (`Decode` -> `Recognize` -> `Refine` -> `Layout` -> `Erase`), prior cache hit optimization, and cooperative cancellation.
+  - `src/engine/embedded.rs`: `EmbeddedEngine` struct implementing `TranslationEngine` (`submit`, `relayout_region`, `cache_key`).
+  - `tests/engine_embedded_tests.rs`: tests for cache key sensitivity, glossary sort stability, request validation, and `relayout_region`.
+  - `tests/engine_submit_tests.rs`: integration tests for async batch execution, prior cache skip, and cooperative cancel.
+- [ ] Next: Đợt 2 (Step 4 & Step 5: Adapter in app `yomu`, Step 10: Server HTTP in pipeline)

@@ -24,7 +24,7 @@ pub struct CallEnv<'a> {
     pub sleeper: &'a dyn Sleeper,
     pub policy: &'a RetryPolicy,
     pub cancel: &'a CancelToken,
-    pub now: &'a dyn Fn() -> SystemTime,
+    pub now: &'a (dyn Fn() -> SystemTime + Send + Sync),
 }
 
 /// One prepared image tile plus the text that travels with it.

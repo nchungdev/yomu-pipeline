@@ -3,6 +3,7 @@
 
 pub mod contour;
 pub mod contract;
+pub mod engine;
 pub mod inpaint;
 pub mod layout;
 #[cfg(feature = "llm")]
@@ -16,6 +17,10 @@ pub mod types;
 pub mod typography;
 
 pub use contour::{BubbleContour, ContourDetectionOptions};
+pub use contract::v1::{CancelToken, EngineError, EventSink, JobHandle, TranslationEngine};
+pub use engine::{
+    cache_key, event_channel, glossary_hash, CallbackEventSink, ChannelEventSink, EmbeddedEngine,
+};
 pub use inpaint::{
     clamp_rect_against_neighbors, inpaint_page, smart_inpaint, InpaintResult, StatisticalFlatFill,
 };

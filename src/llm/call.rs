@@ -87,7 +87,7 @@ pub async fn call_with_retry(
     req: &HttpRequest,
     policy: &RetryPolicy,
     cancel: &CancelToken,
-    now: &dyn Fn() -> SystemTime,
+    now: &(dyn Fn() -> SystemTime + Send + Sync),
 ) -> Result<HttpResponse, CallError> {
     let mut slept = Duration::ZERO;
     let mut attempt: u32 = 0;
