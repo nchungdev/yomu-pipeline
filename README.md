@@ -43,9 +43,9 @@ flowchart TD
 | Stage | What happens | Status |
 |---|---|---|
 | Decode + hash | Decode the original once; hash the original bytes (`cache_key` input). Never re-compress an already compressed copy | Planned |
-| LLM preprocess | Downscale (current app default: long edge 1280 px, JPEG q82, single-channel JPEG for near-gray pages); tile tall pages with overlap instead of shrinking them | Exists in the app (`translation_adapters/image_opt.rs`), to be moved here |
-| LLM call | Prompt + schema, retry per HTTP call, typed `ProviderError` (rate limit, quota, auth, timeout, invalid response) | Exists in the app (`vision_llm.rs`), to be moved here |
-| Glossary | Series glossary, character list, pronoun pairs, speaker/emotion carried from previous pages are injected into the prompt | Data model exists in the app; not wired into the prompt yet |
+| LLM preprocess | Downscale (long edge 1600 px, JPEG q85, grayscale detection); tile tall pages with overlap (15%) instead of shrinking them | Implemented (`src/llm/image_prep.rs`, `tiling.rs`, feature `llm`) |
+| LLM call | Prompt + schema, retry per HTTP call, typed `ProviderError` (rate limit, quota, auth, timeout, invalid response), fallback chain, `translate_page` | Implemented (`src/llm/`, feature `llm`) |
+| Glossary | Series glossary, character list, pronoun pairs, speaker/emotion carried from previous pages are injected into the prompt | Implemented (`src/llm/prompt.rs`, feature `llm`) |
 | Contour | 8-connected flood fill, hole filling; falls back to a rectangle from the bounds | Implemented (`src/contour.rs`, `src/inpaint/region.rs`) |
 | Layout | Dynamic-programming line breaking with Vietnamese break penalties. Runs **before** erasing | Implemented (`src/layout/`) |
 | Erase | `StatisticalFlatFill` for flat backgrounds, `smart_inpaint` when a bubble outline was detected, otherwise the region is skipped (`ComplexBackground`). Works on a copy; the input image is never modified | Implemented in `process_page` (`src/pipeline.rs`); per-region patch output planned |

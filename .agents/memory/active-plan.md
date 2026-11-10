@@ -30,3 +30,21 @@
 - [x] `src/llm/{region,schemas,prompt,parse,reading_order}.rs` (feature `llm`, pure; no segment/two-stage schemas)
 - [x] `tests/llm_parse_tests.rs`, `tests/llm_prompt_tests.rs`
 - Prompt caps: 100 glossary entries / 6000 chars, 12 context lines / 2000 chars, 60 names; untrusted text neutralized and placed before the format section.
+
+## Step 2f (provider adapters, feature `llm`) — done
+- [x] `src/llm/{provider,endpoint,gemini,openai_compat,custom_http}.rs`: `translate_tile(&CallEnv, &ProviderSpec, &TileInput)` -> `Vec<LlmRegion>`; endpoint policy (https, or http for loopback/LAN; no userinfo/query/fragment); key only in sensitive headers and scrubbed from echoed error text
+- [x] `Cargo.toml`: optional `base64 = "0.22"` in `llm` (+ dev-dep for tests)
+- [x] `tests/llm_provider_tests.rs`, `tests/llm_provider_custom_tests.rs`, `tests/common/llm_provider.rs` (MockTransport only)
+- [x] Next (2g): fallback chain + multi-tile orchestration on top of `translate_tile`
+
+## Step 2g (fallback chain & multi-tile orchestration, feature `llm`) — done
+- [x] `src/llm/chain.rs`:
+  - `matches_languages(spec, src, dst)`: filters providers by target/source languages (empty = all)
+  - `merge_provider_errors(&[ProviderError])`: priority merge `RateLimited` (min wait hint) > `QuotaExhausted` (min reset hint) > `Auth` > last error
+  - `translate_tile_chain`: provider fallback on RateLimited/Quota/Auth/Server/Network/Timeout/ContentBlocked/BadRequest/InvalidResponse; halts immediately on cancel
+  - `LlmPageRequest` (9 fields: image, chain, source_lang, target_lang, glossary, context, known_characters, reading_direction, prep)
+  - `translate_page`: atomic page failure policy, pipeline flow `prepare_page` -> `translate_tile_chain` per tile -> `remap_tile_rect` -> seam deduplication (`dedupe_overlapping`) -> `sort_regions_by_reading_order` -> `LlmPage`
+- [x] `src/llm/mod.rs` & `src/lib.rs`: re-exports `translate_page`, `LlmPageRequest`, `LlmPage`, `LlmRegion` behind `#[cfg(feature = "llm")]`
+- [x] `tests/llm_chain_tests.rs` (8 unit/integration tests with MockTransport)
+- [x] `tests/llm_translate_page_tests.rs` (3 end-to-end tests: 1-tile, tall webtoon seam deduplication & coordinate remapping, atomic failure policy)
+- [ ] Next: Step 3 (TranslationEngine async + events + cancel + relayout_region + cache_key)
